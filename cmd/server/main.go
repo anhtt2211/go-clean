@@ -1,8 +1,9 @@
-package server
+package main
 
 import (
-	"My-Clean/internal/use-cases"
-	"log"
+	use_cases2 "My-Clean/internal/application/use-cases"
+	"My-Clean/internal/presentation/http/middleware"
+	"fmt"
 	"net/http"
 
 	"My-Clean/internal/infrastructure/persistence"
@@ -15,21 +16,38 @@ func main() {
 	persistence.Connect()
 	db := persistence.DB
 
-	userRepo := repositories.NewMySQLUserRepository(db)
-	userUseCase := use_cases.NewUserUseCase(userRepo)
+	fmt.Println("Starting server on port 8000")
+
+	userRepo := repositories.NewGORMUserRepository(db)
+
+	userUseCase := use_cases2.NewUserUseCase(userRepo)
+	authUseCase := use_cases2.NewAuthUseCase(userRepo)
+
 	userHandler := handler.NewUserHandler(userUseCase)
+	authHandler := handler.NewAuthHandler(authUseCase)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/register", userHandler.Register).Methods("POST")
-	r.HandleFunc("/login", userHandler.Login).Methods("POST")
 
-	api := r.PathPrefix("/api").Subrouter()
-	api.Use(middleware.AuthMiddleware)
-	api.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
-	api.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
-	api.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
-	api.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT")
-	api.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
+	// Health check endpoint
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}).Methods("GET")
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	privateRoute := r.PathPrefix("/api").Subrouter()
+	publicRoute := r.PathPrefix("/api").Subrouter()
+
+	privateRoute.Use(middleware.AuthMiddleware)
+
+	auth := publicRoute.PathPrefix("/auth").Subrouter()
+	auth.HandleFunc("/register", authHandler.Register).Methods("POST")
+	auth.HandleFunc("/login", authHandler.Login).Methods("POST")
+
+	users := privateRoute.PathPrefix("/users").Subrouter()
+	users.HandleFunc("/", userHandler.GetUsers).Methods("GET")
+	users.HandleFunc("/{id}", userHandler.GetUser).Methods("GET")
+	users.HandleFunc("/", userHandler.CreateUser).Methods("POST")
+	users.HandleFunc("/{id}", userHandler.UpdateUser).Methods("PUT")
+	users.HandleFunc("/{id}", userHandler.DeleteUser).Methods("DELETE")
+
+	http.ListenAndServe("127.0.0.1:8000", r)
 }

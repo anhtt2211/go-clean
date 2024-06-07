@@ -1,26 +1,29 @@
 package persistence
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-import (
-	_ "github.com/go-sql-driver/mysql"
-)
-
-var DB *sql.DB
+var DB *gorm.DB
 
 func Connect() {
-	dsn := "go_user:password@tcp(127.0.0.1:3306)/go_crud_auth"
+	dsn := "user:userpassword@tcp(127.0.0.1:3306)/go_crud_auth"
 	var err error
-	DB, err = sql.Open("mysql", dsn)
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
 
-	if err = DB.Ping(); err != nil {
+	sqlDB, err := DB.DB()
+	if err != nil {
+		log.Fatalf("Error getting database instance: %v", err)
+	}
+
+	if err = sqlDB.Ping(); err != nil {
 		log.Fatalf("Error pinging the database: %v", err)
 	}
 

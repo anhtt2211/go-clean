@@ -1,74 +1,54 @@
 package repositories
 
 import (
-	"My-Clean/internal/domain"
-	"database/sql"
+	"My-Clean/internal/domain/entities"
+	"My-Clean/internal/domain/repositories"
+	"gorm.io/gorm"
 )
 
-type MySQLUserRepository struct {
-	DB *sql.DB
+type GORMUserRepository struct {
+	DB *gorm.DB
 }
 
-func NewMySQLUserRepository(db *sql.DB) domain.UserRepository {
-	return &MySQLUserRepository{DB: db}
+func NewGORMUserRepository(db *gorm.DB) repositories.UserRepository {
+	return &GORMUserRepository{DB: db}
 }
 
-func (repo *MySQLUserRepository) Create(user *domain.User) error {
-	query := "INSERT INTO users (username, password) VALUES (?, ?)"
-	_, err := repo.DB.Exec(query, user.Username, user.Password)
-	return err
+func (repo *GORMUserRepository) Create(user *entities.User) error {
+	result := repo.DB.Create(user)
+	return result.Error
 }
 
-func (repo *MySQLUserRepository) GetByID(id int) (*domain.User, error) {
-	query := "SELECT id, username, password FROM users WHERE id = ?"
-	row := repo.DB.QueryRow(query, id)
-	user := &domain.User{}
-	err := row.Scan(&user.ID, &user.Username, &user.Password)
-	if err == sql.ErrNoRows {
+func (repo *GORMUserRepository) GetByID(id int) (*entities.User, error) {
+	var user entities.User
+	result := repo.DB.First(&user, id)
+	if result.Error == gorm.ErrRecordNotFound {
 		return nil, nil
 	}
-	return user, err
+	return &user, result.Error
 }
 
-func (repo *MySQLUserRepository) GetByUsername(username string) (*domain.User, error) {
-	query := "SELECT id, username, password FROM users WHERE username = ?"
-	row := repo.DB.QueryRow(query, username)
-	user := &domain.User{}
-	err := row.Scan(&user.ID, &user.Username, &user.Password)
-	if err == sql.ErrNoRows {
+func (repo *GORMUserRepository) GetByUsername(username string) (*entities.User, error) {
+	var user entities.User
+	result := repo.DB.Where("username = ?", username).First(&user)
+	if result.Error == gorm.ErrRecordNotFound {
 		return nil, nil
 	}
-	return user, err
+	return &user, result.Error
 }
 
-func (repo *MySQLUserRepository) GetAll() ([]*domain.User, error) {
-	query := "SELECT id, username, password FROM users"
-	rows, err := repo.DB.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	users := []*domain.User{}
-	for rows.Next() {
-		var user domain.User
-		err := rows.Scan(&user.ID, &user.Username, &user.Password)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, &user)
-	}
-	return users, nil
+func (repo *GORMUserRepository) GetAll() ([]*entities.User, error) {
+	var users []*entities.User
+	result := repo.DB.Find(&users)
+	return users, result.Error
 }
 
-func (repo *MySQLUserRepository) Update(user *domain.User) error {
-	query := "UPDATE users SET username = ?, password = ? WHERE id = ?"
-	_, err := repo.DB.Exec(query, user.Username, user.Password, user.ID)
-	return err
+func (repo *GORMUserRepository) Update(user *entities.User) error {
+	result := repo.DB.Save(user)
+	return result.Error
 }
 
-func (repo *MySQLUserRepository) Delete(id int) error {
-	query := "DELETE FROM users WHERE id = ?"
-	_, err := repo.DB.Exec(query, id)
-	return err
+func (repo *GORMUserRepository) Delete(id int) error {
+	result := repo.DB.Delete(&entities.User{}, id)
+	return result.Error
 }

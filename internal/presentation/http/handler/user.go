@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"My-Clean/internal/use-cases"
+	"My-Clean/internal/application/use-cases"
+	"My-Clean/internal/domain/entities"
 	"My-Clean/internal/utils"
 	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"My-Clean/internal/domain"
 	"github.com/gorilla/mux"
 )
 
@@ -17,28 +17,6 @@ type UserHandler struct {
 
 func NewUserHandler(userUseCase *use_cases.UserUseCase) *UserHandler {
 	return &UserHandler{UserUseCase: userUseCase}
-}
-
-func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var user domain.User
-	json.NewDecoder(r.Body).Decode(&user)
-	err := h.UserUseCase.Register(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	utils.RespondWithJSON(w, http.StatusCreated, user)
-}
-
-func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var user domain.User
-	json.NewDecoder(r.Body).Decode(&user)
-	token, err := h.UserUseCase.Login(user.Username, user.Password)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-	utils.RespondWithJSON(w, http.StatusOK, map[string]string{"token": token})
 }
 
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
@@ -70,9 +48,9 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user domain.User
+	var user entities.User
 	json.NewDecoder(r.Body).Decode(&user)
-	err := h.UserUseCase.Register(&user)
+	err := h.UserUseCase.Create(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
