@@ -1,14 +1,16 @@
 package use_cases
 
 import (
+	"My-Clean/internal/application/dtos"
 	"My-Clean/internal/domain/entities"
+	"My-Clean/internal/domain/repositories"
 )
 
 type UserUseCase struct {
-	UserRepository entities.UserRepository
+	UserRepository repositories.UserRepository
 }
 
-func NewUserUseCase(repo entities.UserRepository) *UserUseCase {
+func NewUserUseCase(repo repositories.UserRepository) *UserUseCase {
 	return &UserUseCase{UserRepository: repo}
 }
 
@@ -24,12 +26,12 @@ func (uc *UserUseCase) GetAll() ([]*entities.User, error) {
 	return uc.UserRepository.GetAll()
 }
 
-func (uc *UserUseCase) Create(user *entities.User) error {
-	return uc.UserRepository.Create(user)
+func (uc *UserUseCase) Create(user *dtos.CreateUserDto) error {
+	return uc.UserRepository.Create(user.ToUserEntity())
 }
 
-func (uc *UserUseCase) Update(user *entities.User) error {
-	return uc.UserRepository.Update(user)
+func (uc *UserUseCase) Update(user *dtos.UpdateUserDto) error {
+	return uc.UserRepository.Update(user.ToUserEntity())
 }
 
 func (uc *UserUseCase) Delete(id int) error {

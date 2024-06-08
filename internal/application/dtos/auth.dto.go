@@ -1,11 +1,20 @@
 package dtos
 
-type RegisterInput struct {
+import "My-Clean/internal/domain/entities"
+
+type RegisterDto struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type LoginInput struct {
+type LoginDto struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+func (dto *RegisterDto) ToUserEntity() *entities.User {
+	return &entities.User{
+		Username: dto.Username,
+		Password: dto.Password,
+	}
 }

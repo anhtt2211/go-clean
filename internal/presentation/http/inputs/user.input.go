@@ -2,25 +2,27 @@ package inputs
 
 import "My-Clean/internal/application/dtos"
 
-type RegisterInput struct {
+type CreateUserInput struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type LoginInput struct {
+type UpdateUserInput struct {
+	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-func (input *RegisterInput) ToRegisterDto() *dtos.RegisterDto {
-	return &dtos.RegisterDto{
+func (input *CreateUserInput) ToCreateUserDto() *dtos.CreateUserDto {
+	return &dtos.CreateUserDto{
 		Username: input.Username,
 		Password: input.Password,
 	}
 }
 
-func (input *LoginInput) ToLoginDto() *dtos.LoginDto {
-	return &dtos.LoginDto{
+func (input *UpdateUserInput) ToUpdateUserDto() *dtos.UpdateUserDto {
+	return &dtos.UpdateUserDto{
+		ID:       input.ID,
 		Username: input.Username,
 		Password: input.Password,
 	}

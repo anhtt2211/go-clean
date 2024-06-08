@@ -2,8 +2,10 @@ package main
 
 import (
 	use_cases2 "My-Clean/internal/application/use-cases"
+	"My-Clean/internal/infrastructure/persistence/migrations"
 	"My-Clean/internal/presentation/http/middleware"
 	"fmt"
+	"log"
 	"net/http"
 
 	"My-Clean/internal/infrastructure/persistence"
@@ -15,6 +17,10 @@ import (
 func main() {
 	persistence.Connect()
 	db := persistence.DB
+	// Automatically migrate the schema
+	if err := migrations.AutoMigrate(); err != nil {
+		log.Fatalf("Error migrating database schema: %v", err)
+	}
 
 	fmt.Println("Starting server on port 8000")
 
@@ -43,6 +49,7 @@ func main() {
 	auth.HandleFunc("/login", authHandler.Login).Methods("POST")
 
 	users := privateRoute.PathPrefix("/users").Subrouter()
+	users.HandleFunc("/me", userHandler.GetUsers).Methods("GET")
 	users.HandleFunc("/", userHandler.GetUsers).Methods("GET")
 	users.HandleFunc("/{id}", userHandler.GetUser).Methods("GET")
 	users.HandleFunc("/", userHandler.CreateUser).Methods("POST")

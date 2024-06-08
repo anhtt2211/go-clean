@@ -22,7 +22,26 @@ func (u UserClaims) Valid() error {
 }
 
 func GenerateJWT(user entities.User) (string, error) {
-	return "", nil
+	// Create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &UserClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+			IssuedAt:  time.Now().Unix(),
+			// You can also add other custom claims here if needed
+		},
+	})
+
+	// Set custom claims (id and username)
+	token.Claims.(*UserClaims).ID = user.ID
+	token.Claims.(*UserClaims).Username = user.Username
+
+	// Sign the token with the secret key
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
 func ValidateJWT(tokenStr string) (entities.User, error) {
