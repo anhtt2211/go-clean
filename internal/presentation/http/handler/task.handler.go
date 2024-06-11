@@ -78,6 +78,15 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	if val, ok := r.Form["order"]; ok && len(val) > 0 {
 		options.Order = val[0]
 	}
+	if val, ok := r.Form["filters"]; ok && len(val) > 0 {
+		filters := make(map[string]interface{})
+		err := json.Unmarshal([]byte(val[0]), &filters)
+		if err != nil {
+			http.Error(w, "Invalid filters value", http.StatusBadRequest)
+			return
+		}
+		options.Filters = filters
+	}
 
 	// Fetch tasks from use case
 	tasks, err := h.TaskUseCase.Gets(options)
