@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewRouter(userUseCase *use_cases.UserUseCase, authUseCase *use_cases.AuthUseCase) *mux.Router {
+func NewRouter(userUseCase *use_cases.UserUseCase, authUseCase *use_cases.AuthUseCase, taskUseCase *use_cases.TaskUseCase) *mux.Router {
 	r := mux.NewRouter()
 
 	// Health check endpoint
@@ -39,6 +39,15 @@ func NewRouter(userUseCase *use_cases.UserUseCase, authUseCase *use_cases.AuthUs
 	users.HandleFunc("/", userHandler.CreateUser).Methods("POST")
 	users.HandleFunc("/{id}", userHandler.UpdateUser).Methods("PUT")
 	users.HandleFunc("/{id}", userHandler.DeleteUser).Methods("DELETE")
+
+	// Task routes
+	taskHandler := handler.NewTaskHandler(taskUseCase)
+	tasks := privateRoute.PathPrefix("/tasks").Subrouter()
+	tasks.HandleFunc("/", taskHandler.GetTasks).Methods("GET")
+	tasks.HandleFunc("/{id}", taskHandler.GetTask).Methods("GET")
+	tasks.HandleFunc("/", taskHandler.CreateTask).Methods("POST")
+	tasks.HandleFunc("/{id}", taskHandler.UpdateTask).Methods("PUT")
+	tasks.HandleFunc("/{id}", taskHandler.DeleteTask).Methods("DELETE")
 
 	return r
 }
