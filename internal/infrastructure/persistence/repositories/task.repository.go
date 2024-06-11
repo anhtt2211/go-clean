@@ -34,7 +34,7 @@ func (repo *GORMTaskRepository) Gets(options types.PaginateOptions) ([]*entities
 	query := repo.DB
 
 	if options.Keyword != "" {
-		query = query.Where("name LIKE ?", "%"+options.Keyword+"%")
+		query = query.Where("title LIKE ? OR description LIKE ?", "%"+options.Keyword+"%", "%"+options.Keyword+"%")
 	}
 	if options.Filters != nil {
 		query = query.Where(options.Filters)

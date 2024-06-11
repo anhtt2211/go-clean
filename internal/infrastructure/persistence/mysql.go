@@ -28,7 +28,9 @@ func Connect() {
 
 	// Connect to the database
 	dsnWithDB := "user:userpassword@tcp(127.0.0.1:3306)/go_crud_auth?parseTime=true"
-	DB, err = gorm.Open(mysql.Open(dsnWithDB), &gorm.Config{})
+	DB, err = gorm.Open(mysql.Open(dsnWithDB), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
