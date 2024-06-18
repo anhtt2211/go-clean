@@ -52,11 +52,11 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if users == nil {
-		utils.RespondWithJSON(w, http.StatusOK, []interface{}{})
+		utils.RespondWithJSON(w, http.StatusOK, []entities.User{}, "No users found")
 		return
 	}
 
-	utils.RespondWithJSON(w, http.StatusOK, users)
+	utils.RespondWithJSON(w, http.StatusOK, users, "Users retrieved successfully")
 }
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +81,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with user data
-	utils.RespondWithJSON(w, http.StatusOK, user)
+	utils.RespondWithJSON(w, http.StatusOK, user, "User retrieved successfully")
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +92,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusCreated, user)
+	utils.RespondWithJSON(w, http.StatusCreated, user, "User created successfully")
 }
 
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +124,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with the updated user DTO
-	utils.RespondWithJSON(w, http.StatusOK, userDto)
+	utils.RespondWithJSON(w, http.StatusOK, userDto, "User updated successfully")
 }
 
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -139,5 +139,5 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+	utils.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"}, "User deleted successfully")
 }

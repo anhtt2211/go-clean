@@ -22,7 +22,7 @@ const (
 
 // Task struct with enums for priority and status
 type Task struct {
-	ID          int            `json:"id" gorm:"primaryKey"`
+	ID          uint           `json:"id" gorm:"primaryKey"`
 	Title       string         `json:"title"`
 	Description *string        `json:"description"`                   // Nullable
 	Priority    *Priority      `json:"priority"`                      // Nullable

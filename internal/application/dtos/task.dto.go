@@ -57,3 +57,15 @@ func (dto *UpdateTaskDto) ToTaskEntity() *entities.Task {
 		Status:      status,
 	}
 }
+
+type UpdateReminderDto struct {
+	ID       uint      `json:"id" binding:"required"`
+	Reminder time.Time `json:"reminder" binding:"required"`
+}
+
+func (dto *UpdateReminderDto) ToTaskEntity() *entities.Task {
+	return &entities.Task{
+		ID:       dto.ID,
+		Reminder: &dto.Reminder,
+	}
+}

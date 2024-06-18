@@ -42,7 +42,7 @@ func (h *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with task data
-	utils.RespondWithJSON(w, http.StatusOK, task)
+	utils.RespondWithJSON(w, http.StatusOK, task, "Task retrieved successfully")
 }
 
 func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +96,7 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with tasks data
-	utils.RespondWithJSON(w, http.StatusOK, tasks)
+	utils.RespondWithJSON(w, http.StatusOK, tasks, "Tasks retrieved successfully")
 }
 
 func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +121,7 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with the created task DTO
-	utils.RespondWithJSON(w, http.StatusCreated, taskDto)
+	utils.RespondWithJSON(w, http.StatusCreated, taskDto, "Task created successfully")
 }
 
 func (h *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
@@ -157,7 +157,7 @@ func (h *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with the updated task DTO
-	utils.RespondWithJSON(w, http.StatusOK, taskDto)
+	utils.RespondWithJSON(w, http.StatusOK, taskDto, "Task updated successfully")
 }
 
 func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
@@ -172,5 +172,38 @@ func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+	utils.RespondWithJSON(w, http.StatusOK, nil, "Task deleted successfully")
+}
+
+func (h *TaskHandler) SetReminder(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "Invalid task ID", http.StatusBadRequest)
+		return
+	}
+
+	// Decode the JSON request body into a SetReminderInput
+	var reminderInput inputs.UpdateReminderInput
+	if err := json.NewDecoder(r.Body).Decode(&reminderInput); err != nil {
+		http.Error(w, "Invalid input data", http.StatusBadRequest)
+		return
+	}
+	reminderInput.ID = uint(id)
+
+	// Call the use case to set the reminder
+	reminderDto, err := reminderInput.ToUpdateReminderDto()
+	if err != nil {
+		http.Error(w, "Invalid input data: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	success, err := h.TaskUseCase.UpdateReminder(reminderDto)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the result
+	utils.RespondWithJSON(w, http.StatusOK, map[string]bool{"success": success}, "Reminder updated successfully")
 }

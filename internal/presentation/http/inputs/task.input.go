@@ -29,6 +29,11 @@ type UpdateTaskInput struct {
 	Status      *string    `json:"status" validate:"omitempty,oneof=Pending Completed"`
 }
 
+type UpdateReminderInput struct {
+	ID       uint      `json:"id" binding:"required"`
+	Reminder time.Time `json:"reminder" binding:"required"`
+}
+
 func (input *CreateTaskInput) ToCreateTaskDto() (*dtos.CreateTaskDto, error) {
 	var priority *entities.Priority
 	if input.Priority != nil {
@@ -83,5 +88,16 @@ func (input *UpdateTaskInput) ToUpdateTaskDto() (*dtos.UpdateTaskDto, error) {
 		DueDate:     input.DueDate,
 		Reminder:    input.Reminder,
 		Status:      status,
+	}, nil
+}
+
+func (input *UpdateReminderInput) ToUpdateReminderDto() (*dtos.UpdateReminderDto, error) {
+	if err := validate.Struct(input); err != nil {
+		return nil, err
+	}
+
+	return &dtos.UpdateReminderDto{
+		ID:       input.ID,
+		Reminder: input.Reminder,
 	}, nil
 }

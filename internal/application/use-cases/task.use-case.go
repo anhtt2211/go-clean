@@ -34,3 +34,7 @@ func (uc *TaskUseCase) Update(Task *dtos.UpdateTaskDto) error {
 func (uc *TaskUseCase) Delete(id uint) error {
 	return uc.TaskRepository.Delete(id)
 }
+
+func (uc *TaskUseCase) UpdateReminder(dto *dtos.UpdateReminderDto) (bool, error) {
+	return uc.TaskRepository.UpdateReminder(dto.ID, dto.Reminder)
+}

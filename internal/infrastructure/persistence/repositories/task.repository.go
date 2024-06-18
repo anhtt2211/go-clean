@@ -5,6 +5,7 @@ import (
 	"My-Clean/internal/domain/repositories"
 	"My-Clean/internal/domain/types"
 	"gorm.io/gorm"
+	"time"
 )
 
 type GORMTaskRepository struct {
@@ -61,4 +62,9 @@ func (repo *GORMTaskRepository) Update(task *entities.Task) error {
 func (repo *GORMTaskRepository) Delete(id uint) error {
 	result := repo.DB.Delete(&entities.Task{}, id)
 	return result.Error
+}
+
+func (repo *GORMTaskRepository) UpdateReminder(id uint, reminder time.Time) (bool, error) {
+	result := repo.DB.Update("reminder", reminder).Where("id = ?", id)
+	return result.RowsAffected > 0, result.Error
 }
